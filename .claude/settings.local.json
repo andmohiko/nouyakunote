@@ -15,7 +15,14 @@
       "Bash(firebase firestore:indexes)",
       "Bash(pnpm web build)",
       "Bash(pnpm functions pre-build)",
-      "WebFetch(domain:wagri.naro.go.jp)"
+      "WebFetch(domain:wagri.naro.go.jp)",
+      "WebFetch(domain:pesticide.maff.go.jp)",
+      "WebFetch(domain:www.acis.famic.go.jp)",
+      "WebFetch(domain:www.agro.jp)",
+      "WebFetch(domain:pssj2.jp)",
+      "WebFetch(domain:www.noukaweb.com)",
+      "WebFetch(domain:famico.jp)",
+      "WebFetch(domain:www.maff.go.jp)"
     ],
     "deny": [],
     "ask": []

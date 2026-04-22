@@ -7,6 +7,11 @@ service cloud.firestore {
       return request.resource.data;
     }
 
+    // 既存のドキュメントのデータ
+    function resourceData() {
+      return resource.data;
+    }
+
     // ログイン済かどうか
     function isSignedIn() {
       return request.auth.uid != null;
@@ -18,62 +23,68 @@ service cloud.firestore {
     }
 
     // User のスキーマバリデーション
-    function isValidUserSchema(requestData) {
-      return requestData.size() == 3
-        && 'createdAt' in requestData && requestData.createdAt is timestamp
-        && 'email' in requestData && requestData.email is string
-        && 'updatedAt' in requestData && requestData.updatedAt is timestamp;
+    function isValidUserSchema(data) {
+      return data.size() == 3
+        && 'createdAt' in data && data.createdAt is timestamp
+        && 'phoneNumber' in data && data.phoneNumber is string
+        && 'updatedAt' in data && data.updatedAt is timestamp;
     }
 
-    // Note のスキーマバリデーション
-    function isValidNoteSchema(requestData) {
-      return requestData.size() == 10
-        && 'createdAt' in requestData && requestData.createdAt is timestamp
-        && 'updatedAt' in requestData && requestData.updatedAt is timestamp
-        && 'updatedBy' in requestData && requestData.updatedBy is string
-        && 'content' in requestData && requestData.content is string
-        && 'embedding' in requestData
-        && 'isPinned' in requestData && requestData.isPinned is bool
-        && 'ogp' in requestData && (requestData.ogp is map || requestData.ogp == null)
-        && 'keywords' in requestData && requestData.keywords is string
-        && 'tags' in requestData && requestData.tags is list
-        && 'title' in requestData && (requestData.title is string || requestData.title == null);
+    // Field のスキーマバリデーション
+    function isValidFieldSchema(data) {
+      return data.size() == 4
+        && 'createdAt' in data && data.createdAt is timestamp
+        && 'name' in data && data.name is string
+        && 'updatedAt' in data && data.updatedAt is timestamp
+        && 'userId' in data && data.userId is string;
     }
 
-    // Template のスキーマバリデーション
-    function isValidTemplateSchema(requestData) {
-      return requestData.size() == 7
-        && 'body' in requestData && requestData.body is string
-        && 'createdAt' in requestData && requestData.createdAt is timestamp
-        && 'defaultKeyword' in requestData && requestData.defaultKeyword is string
-        && 'defaultTags' in requestData && requestData.defaultTags is list
-        && 'defaultTitle' in requestData && requestData.defaultTitle is string
-        && 'name' in requestData && requestData.name is string
-        && 'updatedAt' in requestData && requestData.updatedAt is timestamp;
+    // Spray のスキーマバリデーション
+    function isValidSpraySchema(data) {
+      return data.size() == 13
+        && 'createdAt' in data && data.createdAt is timestamp
+        && 'dilutionRate' in data && data.dilutionRate is number
+        && 'fieldId' in data && data.fieldId is string
+        && 'fieldName' in data && data.fieldName is string
+        && 'note' in data && data.note is string
+        && 'pesticideAmount' in data && data.pesticideAmount is number
+        && 'pesticideName' in data && data.pesticideName is string
+        && 'pesticideUnit' in data && data.pesticideUnit is string
+        && 'registrationNumber' in data && data.registrationNumber is string
+        && 'sprayAmount' in data && data.sprayAmount is number
+        && 'sprayedAt' in data && data.sprayedAt is timestamp
+        && 'updatedAt' in data && data.updatedAt is timestamp
+        && 'userId' in data && data.userId is string;
     }
 
     match /users/{userId} {
       allow read: if isSignedIn() && isUser(userId);
       allow create: if isSignedIn() && isUser(userId) && isValidUserSchema(requestData());
       allow update: if isSignedIn() && isUser(userId) && isValidUserSchema(requestData());
+    }
 
-      match /notes/{noteId} {
-        allow read: if isSignedIn() && isUser(userId);
-        allow create: if isSignedIn() && isUser(userId) && isValidNoteSchema(requestData());
-        allow update: if isSignedIn() && isUser(userId) && isValidNoteSchema(requestData());
-        allow delete: if isSignedIn() && isUser(userId);
-      }
+    match /fields/{fieldId} {
+      allow read: if isSignedIn() && isUser(resourceData().userId);
+      allow create: if isSignedIn() && isUser(requestData().userId) && isValidFieldSchema(requestData());
+      allow update: if isSignedIn() && isUser(resourceData().userId) && isValidFieldSchema(requestData());
+      allow delete: if isSignedIn() && isUser(resourceData().userId);
+    }
 
-      match /tags/{tagId} {
-        allow read: if isSignedIn() && isUser(userId);
-      }
+    match /sprays/{sprayId} {
+      allow read: if isSignedIn() && isUser(resourceData().userId);
+      allow create: if isSignedIn() && isUser(requestData().userId) && isValidSpraySchema(requestData());
+      allow update: if isSignedIn() && isUser(resourceData().userId) && isValidSpraySchema(requestData());
+      allow delete: if isSignedIn() && isUser(resourceData().userId);
+    }
 
-      match /templates/{templateId} {
-        allow read: if isSignedIn() && isUser(userId);
-        allow create: if isSignedIn() && isUser(userId) && isValidTemplateSchema(requestData());
-        allow update: if isSignedIn() && isUser(userId) && isValidTemplateSchema(requestData());
-        allow delete: if isSignedIn() && isUser(userId);
-      }
+    // 農薬マスターデータ（Cloud Functionsからのみ書き込み、認証済みユーザーは読み取りのみ）
+    match /pesticides/{pesticideId} {
+      allow read: if isSignedIn();
+    }
+
+    // 作物名→農薬の逆引きインデックス（Cloud Functionsからのみ書き込み、認証済みユーザーは読み取りのみ）
+    match /cropIndex/{cropName} {
+      allow read: if isSignedIn();
     }
   }
 }

@@ -101,7 +101,7 @@
 
 **農薬データの取得・格納設計:**
 
-FAMIC（農林水産消費安全技術センター）が公開している農薬登録情報の CSV ダウンロードサービスを利用し、自前の Firestore に農薬マスターデータを格納する。
+FAMIC（農林水産消費安全技術センター）が公開している農薬登録情報の CSV ダウンロードサービスを利用し、PostgreSQL に農薬マスターデータを格納する。Firestore は検索性（全文検索・部分一致・JOIN）に制約があるため、農薬マスターデータには PostgreSQL を採用する。
 
 - **データソース**: https://www.acis.famic.go.jp/ddata/index2.htm
 - **ファイル構成**:
@@ -114,11 +114,16 @@ FAMIC（農林水産消費安全技術センター）が公開している農薬
 **データ取込フロー:**
 1. Cloud Functions の定期バッチ（Cloud Scheduler）で FAMIC の CSV（ZIP）をダウンロードする。
 2. ZIP を展開し、基本部・適用部の CSV をパースする。
-3. 基本部と適用部を登録番号で結合し、Firestore の `pesticides` コレクションにバッチ書き込みする。
-4. 作物名 → 農薬登録番号の逆引きインデックスを `cropIndex` コレクションに構築する。
+3. 基本部を `pesticides` テーブルに UPSERT する。
+4. 適用部1 + 適用部2 を `pesticide_applications` テーブルに UPSERT する。
 5. 実行頻度は週 1 回程度を想定（FAMIC の更新頻度に合わせて調整可能）。
 
-**コスト: 無料**（FAMIC CSV は無償公開。外部 API の契約不要）
+**検索フロー:**
+1. フロントエンドから Cloud Functions の `searchPesticides`（onCall）を呼び出す。
+2. Cloud Functions が PostgreSQL に対して作物名で SQL クエリを実行する。
+3. `pesticide_applications` テーブルを作物名で検索し、`pesticides` テーブルと JOIN して結果を返却する。
+
+**コスト: 無料**（FAMIC CSV は無償公開。外部 API の契約不要。PostgreSQL は Cloud SQL 等を使用）
 
 #### F-03: 農薬詳細表示
 
@@ -204,6 +209,7 @@ FAMIC（農林水産消費安全技術センター）が公開している農薬
 
 - Firebase Authentication による認証を必須とする。
 - Firestore セキュリティルールにより、ユーザーは自身のデータのみアクセス可能とする。
+- PostgreSQL への接続は Cloud Functions からのみ行い、クライアントから直接接続しない。
 - FAMIC CSV の取込処理は Cloud Functions 上で実行し、クライアントからは直接アクセスしない。
 
 ### 3.4 可用性・運用
@@ -220,7 +226,8 @@ FAMIC（農林水産消費安全技術センター）が公開している農薬
 |----------|------|
 | フレームワーク | TanStack Start SPAモード (TypeScript) |
 | スタイリング | Tailwind CSS + shadcn/ui |
-| データベース | Cloud Firestore |
+| データベース（ユーザーデータ） | Cloud Firestore |
+| データベース（農薬マスター） | PostgreSQL（Cloud SQL） |
 | 認証 | Firebase Authentication (電話番号 SMS 認証) |
 | サーバーレス関数 | Cloud Functions for Firebase |
 | ホスティング | Firebase Hosting |
@@ -230,9 +237,11 @@ FAMIC（農林水産消費安全技術センター）が公開している農薬
 
 ---
 
-## 5. データベース設計（コレクション構成概要）
+## 5. データベース設計
 
-※ 詳細な DB 設計は別途記載する。ここではコレクション構成の概要のみ示す。
+※ 詳細な DB 設計は別途記載する。ここでは構成の概要のみ示す。
+
+### 5.1 Firestore（ユーザーデータ）
 
 ```
 Firestore
@@ -247,41 +256,32 @@ Firestore
 │   ├── updatedAt: Timestamp 更新日時
 │   └── userId: String ユーザーID
 │
-├── sprays: 農薬の散布記録コレクション
-│   ├── createdAt: Timestamp 作成日時
-│   ├── dilutionRate: Number 希釈倍率
-│   ├── fieldId: String 圃場ID
-│   ├── fieldName: String 圃場名
-│   ├── note: String 備考・メモ
-│   ├── pesticideAmount: Number 農薬使用量
-│   ├── pesticideName: String 農薬名
-│   ├── pesticideUnit: String 農薬の単位（液体or粉末）
-│   ├── registrationNumber: String 農薬登録番号
-│   ├── sprayAmount: Number 散布量
-│   ├── sprayedAt: Timestamp 散布した日付
-│   ├── updatedAt: Timestamp 更新日時
-│   └── userId: String ユーザーID
-│
-├── pesticides: 農薬マスターコレクション（FAMIC CSVから取込）
-│   ├── registrationNumber: String 登録番号（ドキュメントID）
-│   ├── pesticideName: String 農薬の名称
-│   ├── pesticideType: String 農薬の種類名（乳剤・水和剤等）
-│   ├── usage: String 用途（殺虫・殺菌・除草等）
-│   ├── companyName: String 会社名略称
-│   ├── applications: Array 適用情報の配列
-│   │   ├── cropName: String 作物名
-│   │   ├── pestName: String 適用病害虫雑草名
-│   │   ├── dilutionRate: String 希釈倍数・使用量
-│   │   ├── usagePeriod: String 使用時期
-│   │   ├── usageMethod: String 使用方法
-│   │   ├── maxCount: String 本剤の使用回数
-│   │   └── totalMaxCount: String 有効成分を含む農薬の総使用回数
-│   └── updatedAt: Timestamp 取込日時
-│
-└── cropIndex: 作物名→農薬の逆引きインデックス
-    └── {作物名}/
-        └── registrationNumbers: Array<String> 該当する農薬登録番号の配列
+└── sprays: 農薬の散布記録コレクション
+    ├── createdAt: Timestamp 作成日時
+    ├── dilutionRate: Number 希釈倍率
+    ├── fieldId: String 圃場ID
+    ├── fieldName: String 圃場名
+    ├── note: String 備考・メモ
+    ├── pesticideAmount: Number 農薬使用量
+    ├── pesticideName: String 農薬名
+    ├── pesticideUnit: String 農薬の単位（液体or粉末）
+    ├── registrationNumber: String 農薬登録番号
+    ├── sprayAmount: Number 散布量
+    ├── sprayedAt: Timestamp 散布した日付
+    ├── updatedAt: Timestamp 更新日時
+    └── userId: String ユーザーID
 ```
+
+### 5.2 PostgreSQL（農薬マスターデータ）
+
+農薬マスターデータは検索性を重視し PostgreSQL に格納する。Cloud Functions 経由でのみアクセスする。
+
+テーブル定義・マイグレーションは Prisma で管理する。スキーマは `prisma/schema.prisma` に定義する。
+
+**テーブル構成:**
+- `pesticides` — 農薬基本情報（登録番号、名称、種類名、用途、会社名）
+- `pesticide_applications` — 農薬適用情報（作物名、病害虫名、希釈倍数、使用時期、使用方法、使用回数等）
+- `pesticide_applications.crop_name` にインデックスを設定し、作物名検索を高速化する
 
 ---
 
@@ -295,32 +295,39 @@ Firestore
 │  Start App   │     │                                          │
 │              │     │  Cloud Functions                         │
 │  - 農薬検索  │     │   ├─ searchPesticides (onCall)           │
-│  - 散布記録  │     │   │   Firestoreから作物名で農薬検索      │
+│  - 散布記録  │     │   │   PostgreSQLから作物名で農薬検索     │
 │  - 希釈計算  │     │   └─ importPesticides (onSchedule)       │
-│  - PDF生成   │     │       FAMIC CSV → Firestore取込          │
+│  - PDF生成   │     │       FAMIC CSV → PostgreSQL取込         │
 │   (client)   │     │                                          │
 │              │     │                                          │
 │              │◄───►│  Cloud Firestore                         │
 │              │     │   ├─ users/                              │
 │              │     │   ├─ fields/                             │
-│              │     │   ├─ sprays/                             │
-│              │     │   ├─ pesticides/ (農薬マスター)           │
-│              │     │   └─ cropIndex/ (作物名→農薬の逆引き)    │
+│              │     │   └─ sprays/                             │
 │              │     │                                          │
 │              │◄───►│  Firebase Authentication (SMS)           │
 │              │     │                                          │
 │              │     │  Cloud Scheduler                         │
 │              │     │   └─ 週1回: importPesticides             │
 └──────────────┘     └──────────────────────────────────────────┘
-                                    │
-                                    ▼
-                     ┌──────────────────────────────────────┐
-                     │   FAMIC (acis.famic.go.jp)            │
-                     │   農薬登録情報 CSV ダウンロード        │
-                     │   ├─ 登録基本部（農薬名・種類等）      │
-                     │   ├─ 登録適用部1（適用情報 前半）      │
-                     │   └─ 登録適用部2（適用情報 後半）      │
-                     └──────────────────────────────────────┘
+        │                           │
+        │                           ▼
+        │            ┌──────────────────────────────────────┐
+        │            │   FAMIC (acis.famic.go.jp)            │
+        │            │   農薬登録情報 CSV ダウンロード        │
+        │            │   ├─ 登録基本部（農薬名・種類等）      │
+        │            │   ├─ 登録適用部1（適用情報 前半）      │
+        │            │   └─ 登録適用部2（適用情報 後半）      │
+        │            └──────────────────────────────────────┘
+        │
+        │  Cloud Functions 経由でアクセス（クライアントから直接接続しない）
+        │
+        ▼
+┌──────────────────────────────────────┐
+│   PostgreSQL (Cloud SQL)              │
+│   ├─ pesticides（農薬基本情報）        │
+│   └─ pesticide_applications（適用情報）│
+└──────────────────────────────────────┘
 ```
 
 ---

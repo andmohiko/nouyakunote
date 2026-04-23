@@ -3,8 +3,8 @@ import type {
   Uid,
   UpdateUserDto,
   User,
-} from '@vectornote/common'
-import { userCollection } from '@vectornote/common'
+} from '@nouyakunote/common'
+import { userCollection } from '@nouyakunote/common'
 import type { Unsubscribe } from 'firebase/firestore'
 import {
   deleteDoc,

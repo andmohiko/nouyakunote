@@ -4,8 +4,8 @@ import type {
   FieldId,
   Uid,
   UpdateFieldDto,
-} from '@vectornote/common'
-import { fieldCollection } from '@vectornote/common'
+} from '@nouyakunote/common'
+import { fieldCollection } from '@nouyakunote/common'
 import type { Unsubscribe } from 'firebase/firestore'
 import {
   addDoc,

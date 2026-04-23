@@ -4,8 +4,8 @@ import type {
   SprayId,
   Uid,
   UpdateSprayDto,
-} from '@vectornote/common'
-import { sprayCollection } from '@vectornote/common'
+} from '@nouyakunote/common'
+import { sprayCollection } from '@nouyakunote/common'
 import type { Unsubscribe } from 'firebase/firestore'
 import {
   addDoc,

@@ -32,6 +32,9 @@ yarn-error.log*
 # turbo
 .turbo
 
+# generated csv
+assets/csv/
+
 # firebase
 firebase-debug.log
 firestore-debug.log

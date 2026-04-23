@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { createReadStream } from 'node:fs'
 import { resolve } from 'node:path'
 import { parse } from 'csv-parse'
-import { PrismaClient } from '../generated/prisma/client'
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 

@@ -35,6 +35,9 @@ yarn-error.log*
 # generated csv
 assets/csv/
 
+# prisma generated client
+**/generated/prisma/
+
 # firebase
 firebase-debug.log
 firestore-debug.log

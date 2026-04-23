@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['@prisma/client'],
+  outputFileTracingIncludes: {
+    '/api/*': ['./src/generated/prisma/*.node'],
+  },
   async headers() {
     return [
       {

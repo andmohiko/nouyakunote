@@ -29,7 +29,8 @@
       "Bash(node -e \":*)",
       "Bash(pnpm etl:*)",
       "Bash(pnpm import-pesticides:*)",
-      "Bash(pnpm console build)"
+      "Bash(pnpm console build)",
+      "Bash(pnpm --filter @nouyakunote/console exec prisma generate)"
     ],
     "deny": [],
     "ask": []

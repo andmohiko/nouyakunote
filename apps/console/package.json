@@ -8,7 +8,7 @@
   "packageManager": "pnpm@10.17.1",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "import-pesticides": "tsx src/scripts/importPesticides.ts"
   },

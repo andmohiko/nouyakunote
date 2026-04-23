@@ -15,16 +15,6 @@ router.post(
   require('./api/health/test').handle,
 )
 
-router.get(
-  '/pesticides/search',
-  require('./api/pesticides/search').handle,
-)
-
-router.get(
-  '/pesticides/:registrationNumber',
-  require('./api/pesticides/detail').handle,
-)
-
 app.use(router)
 
 export default app

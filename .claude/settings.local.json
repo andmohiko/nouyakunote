@@ -28,7 +28,8 @@
       "Bash(npm install:*)",
       "Bash(node -e \":*)",
       "Bash(pnpm etl:*)",
-      "Bash(pnpm import-pesticides:*)"
+      "Bash(pnpm import-pesticides:*)",
+      "Bash(pnpm console build)"
     ],
     "deny": [],
     "ask": []

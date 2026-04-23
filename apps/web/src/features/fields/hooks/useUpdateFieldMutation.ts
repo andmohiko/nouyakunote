@@ -1,4 +1,4 @@
-import type { FieldId, UpdateFieldDto } from '@vectornote/common'
+import type { FieldId, UpdateFieldDto } from '@nouyakunote/common'
 import { toast } from 'sonner'
 
 import { updateFieldOperation } from '@/infrastructure/firestore/fields'

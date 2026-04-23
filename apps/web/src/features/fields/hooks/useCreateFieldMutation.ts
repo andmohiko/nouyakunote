@@ -1,4 +1,4 @@
-import type { CreateFieldDto } from '@vectornote/common'
+import type { CreateFieldDto } from '@nouyakunote/common'
 import { toast } from 'sonner'
 
 import { createFieldOperation } from '@/infrastructure/firestore/fields'

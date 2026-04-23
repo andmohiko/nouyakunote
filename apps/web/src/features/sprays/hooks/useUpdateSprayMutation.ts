@@ -1,4 +1,4 @@
-import type { PesticideUnit, SprayId, UpdateSprayDto } from '@vectornote/common'
+import type { PesticideUnit, SprayId, UpdateSprayDto } from '@nouyakunote/common'
 import { Timestamp } from 'firebase/firestore'
 import { toast } from 'sonner'
 

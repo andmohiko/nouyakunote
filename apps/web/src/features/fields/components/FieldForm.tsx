@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
-import type { Field } from '@vectornote/common'
+import type { Field } from '@nouyakunote/common'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 

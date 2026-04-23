@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import type { Field } from '@vectornote/common'
+import type { Field } from '@nouyakunote/common'
 import { MapPinIcon, PencilIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'

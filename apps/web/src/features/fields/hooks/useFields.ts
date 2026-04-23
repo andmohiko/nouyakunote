@@ -1,4 +1,4 @@
-import type { Field } from '@vectornote/common'
+import type { Field } from '@nouyakunote/common'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 

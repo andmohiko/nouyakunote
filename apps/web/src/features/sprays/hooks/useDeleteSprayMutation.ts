@@ -1,4 +1,4 @@
-import type { SprayId } from '@vectornote/common'
+import type { SprayId } from '@nouyakunote/common'
 import { toast } from 'sonner'
 
 import { deleteSprayOperation } from '@/infrastructure/firestore/sprays'

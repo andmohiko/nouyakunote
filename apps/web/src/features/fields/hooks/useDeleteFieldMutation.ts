@@ -1,4 +1,4 @@
-import type { FieldId } from '@vectornote/common'
+import type { FieldId } from '@nouyakunote/common'
 import { toast } from 'sonner'
 
 import { deleteFieldOperation } from '@/infrastructure/firestore/fields'

@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import type { FieldId } from '@vectornote/common'
+import type { FieldId } from '@nouyakunote/common'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'

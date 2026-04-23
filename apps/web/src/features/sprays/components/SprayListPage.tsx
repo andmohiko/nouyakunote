@@ -1,4 +1,4 @@
-import type { Spray } from '@vectornote/common'
+import type { Spray } from '@nouyakunote/common'
 import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
 

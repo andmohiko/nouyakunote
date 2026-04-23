@@ -1,4 +1,4 @@
-import type { Spray } from '@vectornote/common'
+import type { Spray } from '@nouyakunote/common'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { Spray } from '@vectornote/common'
+import type { Spray } from '@nouyakunote/common'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'

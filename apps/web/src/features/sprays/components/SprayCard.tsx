@@ -1,4 +1,4 @@
-import type { Spray } from '@vectornote/common'
+import type { Spray } from '@nouyakunote/common'
 import { CalendarIcon, MapPinIcon } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'

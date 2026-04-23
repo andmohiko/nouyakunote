@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prismaClient } from '@/lib/prisma'
 
 /**
  * 作物名で農薬を検索するAPI
@@ -15,7 +15,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     )
   }
 
-  const applications = await prisma.pesticideApplication.findMany({
+  const applications = await prismaClient.pesticideApplication.findMany({
     where: { cropName: crop },
     include: {
       pesticide: true,

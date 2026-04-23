@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prismaClient } from '@/lib/prisma'
 
 type Params = {
   params: Promise<{ registrationNumber: string }>
@@ -15,7 +15,7 @@ export const GET = async (
 ): Promise<NextResponse> => {
   const { registrationNumber } = await params
 
-  const pesticide = await prisma.pesticide.findUnique({
+  const pesticide = await prismaClient.pesticide.findUnique({
     where: { registrationNumber },
     include: {
       applications: true,

@@ -3,15 +3,51 @@ import type { FieldValue as AdminFieldValue } from 'firebase-admin/firestore'
 /** コレクション名 */
 export const pesticideCollection = 'pesticides' as const
 
-/** 適用情報 */
-export type PesticideApplication = {
+/** 適用情報（検索結果用） */
+export type PesticideApplicationSummary = {
   cropName: string
   pestName: string
   dilutionRate: string
   usagePeriod: string
   usageMethod: string
   maxCount: string
-  totalMaxCount: string
+  totalMaxCount1: string | null
+}
+
+/** 適用情報（詳細用） */
+export type PesticideApplicationDetail = PesticideApplicationSummary & {
+  applicationPlace: string | null
+  purpose: string | null
+  sprayVolume: string | null
+  totalMaxCount2: string | null
+  totalMaxCount3: string | null
+  totalMaxCount4: string | null
+  totalMaxCount5: string | null
+}
+
+/** 検索結果の農薬（APIレスポンス） */
+export type PesticideSearchResult = {
+  registrationNumber: string
+  pesticideName: string
+  pesticideType: string
+  usage: string
+  companyName: string
+  formulation: string
+  applications: Array<PesticideApplicationSummary>
+}
+
+/** 農薬詳細（APIレスポンス） */
+export type PesticideDetail = {
+  registrationNumber: string
+  pesticideName: string
+  pesticideType: string
+  usage: string
+  companyName: string
+  formulation: string
+  activeIngredient: string
+  concentration: string
+  registrationDate: string | null
+  applications: Array<PesticideApplicationDetail>
 }
 
 /** Entity型（Firestoreから取得したデータ、Date変換済み） */
@@ -21,7 +57,7 @@ export type Pesticide = {
   pesticideType: string
   usage: string
   companyName: string
-  applications: Array<PesticideApplication>
+  applications: Array<PesticideApplicationSummary>
   updatedAt: Date
 }
 

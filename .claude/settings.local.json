@@ -10,8 +10,8 @@
       "Bash(pnpm --filter web build)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:firebase.google.com)",
-      "Bash(pnpm --filter @vectornote/functions tsc --noEmit)",
-      "Bash(pnpm --filter @vectornote/web tsc --noEmit)",
+      "Bash(pnpm --filter @nouyakunote/functions tsc --noEmit)",
+      "Bash(pnpm --filter @nouyakunote/web tsc --noEmit)",
       "Bash(firebase firestore:indexes)",
       "Bash(pnpm web build)",
       "Bash(pnpm functions pre-build)",
@@ -22,7 +22,12 @@
       "WebFetch(domain:pssj2.jp)",
       "WebFetch(domain:www.noukaweb.com)",
       "WebFetch(domain:famico.jp)",
-      "WebFetch(domain:www.maff.go.jp)"
+      "WebFetch(domain:www.maff.go.jp)",
+      "Read(//private/tmp/**)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(node -e \":*)",
+      "Bash(pnpm etl:*)"
     ],
     "deny": [],
     "ask": []

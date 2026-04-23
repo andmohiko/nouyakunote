@@ -1,4 +1,4 @@
-name: Run @vectornote/common lint
+name: Run @nouyakunote/common lint
 on:
   push:
     paths:

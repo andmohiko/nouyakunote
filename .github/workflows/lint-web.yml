@@ -1,4 +1,4 @@
-name: Run @vectornote/web lint
+name: Run @nouyakunote/web lint
 on:
   push:
     paths:
